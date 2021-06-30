@@ -13,7 +13,7 @@ import (
 
 var hexIDRegexp = regexp.MustCompile(`^[a-fA-F0-9]+-[a-fA-F0-9-]+$`)
 
-func envelopeToDatapoints(env *loggregator_v2.Envelope) ([]*datapoint.Datapoint, error) {
+func envelopeToDatapoints(env *loggregator_v2.Envelope, metadataProvider *ApplicationMetadataProvider) ([]*datapoint.Datapoint, error) {
 	// We intentionally modify the Tags map on the envelope, assuming that the
 	// loggregator code that generated it is not going to reuse envelope
 	// instances or tag maps.
@@ -32,6 +32,16 @@ func envelopeToDatapoints(env *loggregator_v2.Envelope) ([]*datapoint.Datapoint,
 
 	if env.InstanceId != "" {
 		dims["instance_id"] = env.InstanceId
+	}
+
+	if metadataProvider != nil && env.Tags["process_type"] != "" {
+		metadata := metadataProvider.GetMetadata(env.SourceId); if metadata != nil {
+			dims["app_name"] = metadata.ApplicationName
+			dims["space_id"] = metadata.SpaceGuid
+			dims["space_name"] = metadata.SpaceName
+			dims["organization_id"] = metadata.OrganizationGuid
+			dims["organization_name"] = metadata.OrganizationName
+		}
 	}
 
 	var metricType datapoint.MetricType

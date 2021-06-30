@@ -21,6 +21,7 @@ require (
 	github.com/antonmedv/expr v1.8.9
 	github.com/aws/aws-sdk-go v1.38.0
 	github.com/beevik/ntp v0.3.0
+	github.com/cloudfoundry-community/go-cfclient v0.0.0-20210621174645-7773f7e22665
 	github.com/cloudfoundry-incubator/uaago v0.0.0-20190307164349-8136b7bbe76e
 	github.com/coreos/go-systemd v0.0.0-20190719114852-fd7a80b32e1f
 	github.com/creasty/defaults v1.5.1 // indirect

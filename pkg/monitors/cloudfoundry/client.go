@@ -22,13 +22,14 @@ const defaultShardID = "signalfx-nozzle"
 
 type SignalFxGatewayClient struct {
 	gatewayClient *loggregator.RLPGatewayClient
+	metadataProvider *ApplicationMetadataProvider
 	errorCh       chan error
 	logger        logrus.FieldLogger
 
 	ShardID string
 }
 
-func NewSignalFxGatewayClient(gatewayAddr string, uaaToken string, skipVerify bool, logger logrus.FieldLogger) *SignalFxGatewayClient {
+func NewSignalFxGatewayClient(gatewayAddr string, uaaToken string, skipVerify bool, metadataProvider *ApplicationMetadataProvider, logger logrus.FieldLogger) *SignalFxGatewayClient {
 	errorCh := make(chan error)
 
 	transport := http.Transport{
@@ -50,6 +51,7 @@ func NewSignalFxGatewayClient(gatewayAddr string, uaaToken string, skipVerify bo
 
 	return &SignalFxGatewayClient{
 		gatewayClient: gatewayClient,
+		metadataProvider: metadataProvider,
 		ShardID:       defaultShardID,
 		logger:        logger,
 		errorCh:       errorCh,
@@ -109,7 +111,7 @@ func (c *SignalFxGatewayClient) processEnvelopes(ctx context.Context, streamer l
 				continue
 			}
 
-			envDPs, err := envelopeToDatapoints(env)
+			envDPs, err := envelopeToDatapoints(env, c.metadataProvider)
 			if err != nil {
 				log.Printf("Error converting envelope to SignalFx datapoint: %v", err)
 				continue

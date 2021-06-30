@@ -40,6 +40,8 @@ type Config struct {
 	// The nozzle's shard id.  All nozzle instances with the same id will
 	// receive an exclusive subset of the data from the firehose. The default
 	// should suffice in the vast majority of use cases.
+	CloudControllerURL string `yaml:"cloudControllerUrl" default:""`
+	CloudControllerSkipVerify bool `yaml:"cloudControllerSkipVerify"`
 	ShardID string `yaml:"shardId" default:"signalfx_nozzle"`
 }
 
@@ -77,7 +79,9 @@ func (m *Monitor) Configure(conf *Config) error {
 				continue
 			}
 
-			client := NewSignalFxGatewayClient(conf.RLPGatewayURL, uaaToken, conf.RLPGatewaySkipVerify, logger)
+			metadataProvider := NewApplicationMetadataProvider(conf.CloudControllerURL, uaaToken, conf.CloudControllerSkipVerify, logger)
+
+			client := NewSignalFxGatewayClient(conf.RLPGatewayURL, uaaToken, conf.RLPGatewaySkipVerify, metadataProvider, logger)
 			client.ShardID = conf.ShardID
 
 			logger.Info("Running RLP Gateway streamer")
